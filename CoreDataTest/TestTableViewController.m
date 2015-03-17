@@ -98,8 +98,7 @@
 -(void)addFile:(NSTimer*)timer
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        NSManagedObjectContext *localContext = [NSManagedObjectContext MR_contextWithParent:[NSManagedObjectContext MR_defaultContext]];
-        Folder *folder2 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 2" inContext:localContext];
+        Folder *folder2 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 2"];
         File *file = [[[folder2 files] allObjects] firstObject];
         
         NSLog(@"Add file back %@",file.name);
