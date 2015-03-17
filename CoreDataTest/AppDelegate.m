@@ -29,6 +29,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     [MagicalRecord setupAutoMigratingCoreDataStack];
+    [MagicalRecord setLoggingLevel:MagicalRecordLoggingLevelVerbose];
     [self coreDataTestSetup];
     
     return YES;

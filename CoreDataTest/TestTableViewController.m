@@ -78,7 +78,7 @@
 {
     NSArray *array = [File MR_findAllSortedBy:@"name" ascending:YES];
     File *file = array[2];
-    NSLog(@"Remove file %@",file.name);
+    NSLog(@"***** REMOVE FILE: %@ ***** (Thread: %@)",file.name,[[NSThread currentThread] description]);
     [MagicalRecord saveWithBlock:^(NSManagedObjectContext *localContext) {
         File *localFile = [file MR_inContext:localContext];
         Folder *localFolder2 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 2" inContext:localContext];
@@ -87,31 +87,51 @@
         NSArray *localArray = [File MR_findAllWithPredicate:[NSPredicate predicateWithFormat:@"folder.name == %@",@"Folder 1"] inContext:localContext];
         NSLog(@"Objects Left: %ld",[localArray count]);
     } completion:^(BOOL success, NSError *error) {
-        NSLog(@"Remove done!");
+        NSLog(@"***** REMOVING DONE *****");
         //        NSArray *folders = [Folder ]
         //        NSLog(@")
         NSLog(@"Objects Left: %ld",[[self.fetchedResultsController fetchedObjects] count]);
-        [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(addFile:) userInfo:nil repeats:NO];
+        [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(addFile:) userInfo:nil repeats:NO];
     }];
 }
 
 -(void)addFile:(NSTimer*)timer
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        [MagicalRecord saveWithBlock:^(NSManagedObjectContext *localContext) {
-            Folder *folder2 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 2" inContext:localContext];
+        NSLog(@"***** ADDING FILE BACK ***** (Thread: %@)",[[NSThread currentThread] description]);
+        NSManagedObjectContext *context = [NSManagedObjectContext MR_contextWithParent:[NSManagedObjectContext MR_defaultContext]];
+        [context performBlockAndWait:^{ // you could use regular performBlock: here too
+            Folder *folder2 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 2" inContext:context];
             File *file = [[[folder2 files] allObjects] firstObject];
-
-            File *localFile = [file MR_inContext:localContext];
-            Folder *localFolder1 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 1" inContext:localContext];
-            localFile.folder = localFolder1;
-        } completion:^(BOOL success, NSError *error) {
-            [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(removeFile:) userInfo:nil repeats:NO];
-            NSLog(@"Adding done!");
+            
+            Folder *localFolder1 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 1" inContext:context];
+            file.folder = localFolder1;
         }];
-
+        [context MR_saveToPersistentStoreWithCompletion:^(BOOL contextDidSave, NSError *error) {
+            NSLog(@"***** ADDING DONE *****");
+        }];
     });
+    [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(removeFile:) userInfo:nil repeats:NO];
 }
+
+//-(void)addFileDidntWork:(NSTimer*)timer
+//{
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+//        NSLog(@"***** ADDING FILE BACK ***** (Thread: %@)",[[NSThread currentThread] description]);
+//        [MagicalRecord saveWithBlock:^(NSManagedObjectContext *localContext) {
+//            Folder *folder2 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 2" inContext:localContext];
+//            File *file = [[[folder2 files] allObjects] firstObject];
+//            
+//            File *localFile = [file MR_inContext:localContext];
+//            Folder *localFolder1 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 1" inContext:localContext];
+//            localFile.folder = localFolder1;
+//        } completion:^(BOOL success, NSError *error) {
+//            //            [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(removeFile:) userInfo:nil repeats:NO];
+//            NSLog(@"***** ADDING DONE *****");
+//        }];
+//        
+//    });
+//}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
