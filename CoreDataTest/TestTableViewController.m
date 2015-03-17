@@ -98,22 +98,16 @@
 -(void)addFile:(NSTimer*)timer
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
-        Folder *folder2 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 2"];
-        File *file = [[[folder2 files] allObjects] firstObject];
-        
-        NSLog(@"Add file back %@",file.name);
         [MagicalRecord saveWithBlock:^(NSManagedObjectContext *localContext) {
+            Folder *folder2 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 2" inContext:localContext];
+            File *file = [[[folder2 files] allObjects] firstObject];
+
             File *localFile = [file MR_inContext:localContext];
             Folder *localFolder1 = [Folder MR_findFirstByAttribute:@"name" withValue:@"Folder 1" inContext:localContext];
             localFile.folder = localFolder1;
         } completion:^(BOOL success, NSError *error) {
             [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(removeFile:) userInfo:nil repeats:NO];
             NSLog(@"Adding done!");
-            
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                [self.tableView reloadData];
-//                [NSManagedObjectContext MR_defaultContext]
-//            });
         }];
 
     });
