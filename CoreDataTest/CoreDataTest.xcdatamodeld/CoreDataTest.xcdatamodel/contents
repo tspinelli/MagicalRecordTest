@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6751" systemVersion="14C1510" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="File" representedClassName="File" syncable="YES">
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="folder" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Folder" inverseName="files" inverseEntity="Folder" syncable="YES"/>
+    </entity>
+    <entity name="Folder" representedClassName="Folder" syncable="YES">
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="files" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="File" inverseName="folder" inverseEntity="File" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Folder" positionX="-63" positionY="-18" width="128" height="73"/>
+        <element name="File" positionX="-54" positionY="0" width="128" height="73"/>
+    </elements>
+</model>
